@@ -1,0 +1,43 @@
+{
+  "calibration_confirmed": false,
+  "marker_map_confirmed": true,
+  "same_coordinate_frame_confirmed": false,
+  "marker_topic": "/aruco_poses_from_world",
+  "position_topic": "/set_position",
+  "position_service": "/get_position",
+  "marker_shapes": {"1": "square", "2": "circle", "3": "square", "4": "square", "5": "square", "6": "circle"},
+  "discard_ids": null,
+  "marker_overrides": {},
+  "motion": {"velocity": 25, "acceleration": 5},
+  "observation_pose": [0.038, 0.055, 0.13, 90.0],
+  "discard_pose": null,
+  "clearance_z": 0.10,
+  "initial_gripper_deg": 10.0,
+  "initial_tolerance_deg": 5.0,
+  "move_min_s": 0.3,
+  "move_timeout_s": 12.0,
+  "grip_wait_s": 2.0,
+  "joint_tolerance_deg": 2.0,
+  "joint_max_age_s": 2.0,
+  "cartesian_step_m": 0.02,
+  "pitch_step_deg": 10.0,
+  "marker_samples": 3,
+  "marker_max_age_s": 1.5,
+  "marker_jitter_m": 0.008,
+  "marker_jitter_deg": 10.0,
+  "marker_wait_s": 15.0,
+  "shapes": {
+    "triangle": {"grasp_z": null, "pitch_deg": 90.0, "world_offset_xy": [-0.03, 0.0], "local_offset_xy": [0.0, 0.0], "open_deg": -50.0, "close_deg": 10.0},
+    "square": {"grasp_z": null, "pitch_deg": 90.0, "world_offset_xy": [-0.03, 0.0], "local_offset_xy": [0.0, 0.0], "open_deg": -50.0, "close_deg": 10.0},
+    "circle": {"grasp_z": null, "pitch_deg": 90.0, "world_offset_xy": [-0.03, 0.0], "local_offset_xy": [0.0, 0.0], "open_deg": -50.0, "close_deg": 10.0}
+  },
+  "rows": {
+    "triangle": {"slots": [], "after_place": []},
+    "square": {"slots": [null, null], "after_place": []},
+    "circle": {"slots": [null, null, null], "after_place": []}
+  },
+  "supplies": [
+    {"name": "new_square_1", "shape": "square", "pick_pose": null},
+    {"name": "new_circle_1", "shape": "circle", "pick_pose": null}
+  ]
+}
