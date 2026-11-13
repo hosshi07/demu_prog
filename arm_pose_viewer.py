@@ -8,7 +8,7 @@ from arm_kinematics import MOTOR_IDS, forward_kinematics, ticks_to_radians
 
 
 class ArmDisplay:
-    def __init__(self, root, source):
+    def __init__(self, root, source, compact=False):
         import tkinter as tk
         from tkinter import ttk
         self.root = root
@@ -18,11 +18,14 @@ class ArmDisplay:
         root.minsize(880, 620)
         title = {'service': 'MEASURED / encoder-based position',
                  'command': 'COMMAND / last target, NOT measured',
-                 'demo': 'DEMO / simulated data, NOT connected'}[source]
-        ttk.Label(root, text=title, font=('Sans', 18, 'bold')).pack(pady=(18, 4))
+                 'demo': 'DEMO / simulated data, NOT connected',
+                 'jog': 'JOG / commanded target position',
+                 'jog_demo': 'JOG DEMO / no hardware connected'}[source]
+        ttk.Label(root, text=title, font=('Sans', 18, 'bold')).pack(
+            pady=(10 if compact else 18, 4))
         ttk.Label(root, text='Base frame | metres | pitch: positive downward').pack()
         row = ttk.Frame(root)
-        row.pack(fill='x', padx=24, pady=18)
+        row.pack(fill='x', padx=24, pady=10 if compact else 18)
         self.values = []
         for axis, colour in zip('XYZ', ('#c0392b', '#16834a', '#286ac0')):
             box = ttk.Frame(row)
@@ -35,13 +38,14 @@ class ArmDisplay:
         self.details = ttk.Label(root, text='Waiting for all four joints...')
         self.details.pack()
         charts = ttk.Frame(root)
-        charts.pack(padx=16, pady=12)
+        self.charts = charts
+        charts.pack(padx=16, pady=6 if compact else 12)
         self.canvases = []
         for name in ('TOP VIEW: X / Y', 'SIDE VIEW: radial distance / Z'):
             frame = ttk.Frame(charts)
             frame.pack(side='left', padx=5)
             ttk.Label(frame, text=name).pack()
-            canvas = tk.Canvas(frame, width=410, height=280, bg='white',
+            canvas = tk.Canvas(frame, width=410, height=180 if compact else 280, bg='white',
                                highlightthickness=0)
             canvas.pack()
             self.canvases.append(canvas)
@@ -52,7 +56,10 @@ class ArmDisplay:
         self.copy_button = ttk.Button(buttons, text='Copy [x, y, z, pitch]',
                                       command=self.copy, state='disabled')
         self.copy_button.pack()
-        ttk.Label(root, text='Display only: this program sends no motor commands.').pack()
+        footer = ('Target coordinates only; actual arm position is not measured.'
+                  if source in ('jog', 'jog_demo') else
+                  'Display only: this program sends no motor commands.')
+        ttk.Label(root, text=footer).pack()
         self.draw(None)
 
     def copy(self):
@@ -79,16 +86,19 @@ class ArmDisplay:
         # Same scale on both axes: 400 pixels per metre.
         for index, canvas in enumerate(self.canvases):
             canvas.delete('all')
-            ox, oy, scale = (205, 140, 400) if index == 0 else (170, 235, 400)
+            height = int(canvas['height'])
+            ox, oy, scale = ((205, height / 2, 320) if index == 0 else
+                             (170, height - 35, 320)) if height < 280 else (
+                                 (205, 140, 400) if index == 0 else (170, 235, 400))
             for step in range(-5, 6):
                 pos = step * 0.1 * scale
-                canvas.create_line(ox + pos, 0, ox + pos, 280, fill='#edf0f3')
+                canvas.create_line(ox + pos, 0, ox + pos, height, fill='#edf0f3')
                 canvas.create_line(0, oy - pos, 410, oy - pos, fill='#edf0f3')
             canvas.create_line(0, oy, 403, oy, arrow='last', fill='#7b8794')
-            canvas.create_line(ox, 280, ox, 7, arrow='last', fill='#7b8794')
+            canvas.create_line(ox, height, ox, 7, arrow='last', fill='#7b8794')
             canvas.create_text(390, oy - 12, text='+X' if index == 0 else '+r')
             canvas.create_text(ox + 15, 12, text='+Y' if index == 0 else '+Z')
-            canvas.create_text(60, 265, text='grid: 0.1 m', fill='#64748b')
+            canvas.create_text(60, height - 15, text='grid: 0.1 m', fill='#64748b')
             if sample is None:
                 continue
             points = sample[2]

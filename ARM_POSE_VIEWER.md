@@ -1,5 +1,7 @@
 # 手先の XYZ モニタ（Ubuntu 20.04 / ROS2 Foxy）
 
+**画面のボタンでアームを操作して座標をコピーする場合は、[ARM_POSE_JOGGER.md](ARM_POSE_JOGGER.md) の `arm_pose_jogger.py` を使ってください。** 以下は表示専用モニタの手順です。
+
 `arm_pose_viewer.py` と `arm_kinematics.py` を、既存の `keyboard.py` と同じ場所に置いて実行します。パッケージ作成・colcon build は不要です。既存プログラムは変更していません。
 
 画面は **XYZ の数値（m）、上から見た図、横から見た図**を表示します。グリッドは 10 cm。「Copy」ボタンで `[x, y, z, pitch]` をコピーでき、その形式は既存の `move()` に対応します。コピーだけではアームは動きません。GUI はフォントの導入が不要な英語表記です。

@@ -9,6 +9,38 @@ PSI = math.atan2(0.024, 0.128)
 MOTOR_IDS = (11, 12, 13, 14)
 
 
+def inverse_kinematics(pose):
+    """Validated version of the supplied IK; pose is [m, m, m, degrees].
+
+    Stay in x > 0, the half-plane supported by the original atan(y/x).
+    Checks geometric reach and tick range, not collisions or hardware limits.
+    """
+    if len(pose) != 4 or not all(math.isfinite(v) for v in pose):
+        raise ValueError('XYZ and pitch must be finite numbers')
+    x, y, z, pitch_degrees = pose
+    if x <= 0 or z < 0:
+        raise ValueError('Use X > 0 and Z >= 0 (original keyboard.py workspace)')
+    pitch = math.radians(pitch_degrees)
+    h = z - L1 + L4 * math.sin(pitch)
+    k = math.hypot(x, y) - L4 * math.cos(pitch)
+    v = math.hypot(h, k)
+    if v < 1e-12 or not abs(L2 - L3) <= v <= L2 + L3:
+        raise ValueError('Target is outside the geometric reach of the arm')
+
+    def acos(value):
+        return math.acos(max(-1.0, min(1.0, value)))
+
+    alpha = acos((L2*L2 + v*v - L3*L3) / (2 * L2 * v))
+    beta = acos((L2*L2 + L3*L3 - v*v) / (2 * L2 * L3))
+    q2 = math.pi / 2 - alpha - math.atan2(h, k) - PSI
+    q3 = math.pi / 2 - beta + PSI
+    angles = [math.atan2(y, x), q2, q3, pitch - q2 - q3]
+    ticks = [int(2048 + math.degrees(q) / 0.088) for q in angles]
+    if any(not 0 <= value <= 4095 for value in ticks):
+        raise ValueError('Target exceeds the 0..4095 motor position range')
+    return angles, ticks
+
+
 def ticks_to_radians(ticks):
     # Deliberately use the same rounded 0.088 deg/tick as the supplied code.
     return math.radians((ticks - 2048) * 0.088)
